@@ -11,27 +11,18 @@ export const auth = fb.auth() as firebase.auth.Auth;
 export const googleProvider = new fb.auth.GoogleAuthProvider();
 export const db = fb.firestore();
 
-export const getToken = async (): Promise<any> => {
-
-  // todo, save token, authstate here...
-
-  const user = await getCurrentUser(auth);
-  if (user) {
-    return await user.getIdToken();
-  }
-  return Promise.resolve();
-};
-
-/**
- * Promise version of onAuthStateChanged
- * @param auth
- * @returns - updated user
- */
-export function getCurrentUser(auth: firebase.auth.Auth): Promise<firebase.User> {
-  return new Promise((resolve, reject) => {
-    const unsubscribe = auth.onAuthStateChanged((user: firebase.User) => {
-      unsubscribe();
-      resolve(user);
-    }, reject);
-  });
+export async function getToken(): Promise<any> {
+  return await new Promise((resolve: any, reject: any) =>
+    auth.onAuthStateChanged((user: firebase.User | null) => {
+      if (user) {
+        user?.getIdTokenResult()
+          .then(async (r: firebase.auth.IdTokenResult) => {
+            const token = (r.claims["https://dgraph.io/jwt/claims"])
+              ? r.token
+              : await user.getIdToken(true);
+            resolve(token);
+          }, (e: any) => reject(e));
+      }
+    })
+  );
 }

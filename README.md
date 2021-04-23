@@ -1,3 +1,9 @@
+For external setup instructions, see:
+
+[Sister angular project](https://github.com/jdgamble555/angular-fire-dgraph)
+
+This project is meant to show svelte SSR support with DGraph and Firebase Login...
+
 # Sapper URQL
 
 - npm i isomorphic-unfetch

@@ -15,7 +15,7 @@
 
   export async function preload() {
     const dgTask = await client.query(GET_TASKS).toPromise();
-    return { dgTask: dgTask.data.queryTask };
+    return { dgTask: dgTask.data?.queryTask };
   }
 
   interface User {
@@ -42,9 +42,7 @@
     setClient(client);
     const getTasks = operationStore(SUB_GET_TASKS);
     subscription(getTasks).subscribe((r: any) => {
-      if (r.data) {
-        dgTask = r.data?.queryTask;
-      }
+      dgTask = r.data ? r.data?.queryTask : [];
     });
   }
 
@@ -54,7 +52,7 @@
         task: {
           title: text,
           completed: false,
-          user: { username: user.email },
+          user: { email: user.email },
         },
       })
       .toPromise()
@@ -101,6 +99,12 @@
   };
 </script>
 
+<svelte:head>
+  <title>Dgraph Sapper URQL</title>
+</svelte:head>
+
+<h1>Dgraph Sapper URQL</h1>
+
 <section>
   {#if user}
     <Profile
@@ -109,32 +113,25 @@
       uid={user.uid}
     />
     <button on:click={() => auth.signOut()}>Logout</button>
+    <ul>
+      {#each dgTask as task (task.id)}
+        <li>
+          <TaskItem
+            id={task.id}
+            text={task.title}
+            completed={task.completed}
+            on:remove={remove}
+            on:toggle={update}
+          />
+        </li>
+      {/each}
+    </ul>
+
+    <input bind:value={text} on:keypress={onKeyPress} />
+    <button on:click={add}>Add Task</button>
   {:else}
     <button on:click={() => auth.signInWithPopup(googleProvider)}
       >Signin with Google</button
     >
   {/if}
 </section>
-
-<svelte:head>
-  <title>Dgraph Sapper URQL</title>
-</svelte:head>
-
-<h1>Dgraph Sapper URQL</h1>
-
-<ul>
-  {#each dgTask as task (task.id)}
-    <li>
-      <TaskItem
-        id={task.id}
-        text={task.title}
-        completed={task.completed}
-        on:remove={remove}
-        on:toggle={update}
-      />
-    </li>
-  {/each}
-</ul>
-
-<input bind:value={text} on:keypress={onKeyPress} />
-<button on:click={add}>Add Task</button>
