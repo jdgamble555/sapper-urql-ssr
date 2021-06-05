@@ -1,0 +1,15 @@
+type Task  @withSubscription @auth(query: { rule: "query($email: String!) { queryTask { user(filter: { email: { eq: $email } }) { email } }}"}) {
+	id: ID!
+	title: String! @search(by:[fulltext])
+	completed: Boolean! @search
+	user: User!
+}
+
+type User  @withSubscription {
+	email: String! @search(by:[hash]) @id
+	displayName: String!
+	tasks: [Task] @hasInverse(field:user)
+  createdAt: DateTime!
+}
+
+# Dgraph.Authorization {"Header":"X-Auth-Token","Namespace":"https://dgraph.io/jwt/claims","JWKURL":"https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com","Audience":["YOUR PROJECT ID]}

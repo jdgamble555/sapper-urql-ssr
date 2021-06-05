@@ -13,16 +13,7 @@ export const db = fb.firestore();
 
 export async function getToken(): Promise<any> {
   return await new Promise((resolve: any, reject: any) =>
-    auth.onAuthStateChanged((user: firebase.User | null) => {
-      if (user) {
-        user?.getIdTokenResult()
-          .then(async (r: firebase.auth.IdTokenResult) => {
-            const token = (r.claims["https://dgraph.io/jwt/claims"])
-              ? r.token
-              : await user.getIdToken(true);
-            resolve(token);
-          }, (e: any) => reject(e));
-      }
-    })
-  );
+    auth.onAuthStateChanged(async (user: firebase.User | null) => {
+      if (user) { resolve(await user.getIdToken()); }
+    }, (e: any) => reject(e)));
 }
